@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "cabeceras.h"
+#include "ecuaciones.h"
+#include "solver.h"
 
 #define Distance(x, y) (sqrt((x) * (x) + (y) * (y)))
 #define M 1 //masa de la particula
@@ -14,8 +15,8 @@ double phi , t = 0; //phi:angulo de dispersion, t:tiempo dentro de la región R.
 
 //==============================================================================
 //Prototipos
-void PathParticule(double t0, double x0, double y0, double vx_0, double vy_0,char *fileName);
-void ScatteringVariables(double t0, double x0, double y0, double vx_0, double vy_0);
+void path_particule(double t0, double x0, double y0, double vx_0, double vy_0,char *fileName);
+void scattering_variables(double t0, double x0, double y0, double vx_0, double vy_0);
 double Velx(double totalEnergy, double b , double x0);
 double getXPosition(double totalEnergy, double b);
 //==============================================================================
@@ -35,7 +36,7 @@ int main(int argc, char const *argv[]){
         sprintf(fileName, "resultados/Trayectoria_%d.txt",i);
         x0 = getXPosition(totalEnergy, b);
         vx_0 = Velx(totalEnergy, b, x0);
-        PathParticule(t0, x0, b, vx_0, vy_0, fileName);
+        path_particule(t0, x0, b, vx_0, vy_0, fileName);
         b += 1e-4;
     }
     //==========================================================================
@@ -48,7 +49,7 @@ int main(int argc, char const *argv[]){
         t = 0; 
         x0 = getXPosition(totalEnergy, b);
         vx_0 = Velx(totalEnergy, b, x0);
-        ScatteringVariables(t0, x0, b, vx_0, vy_0);
+        scattering_variables(t0, x0, b, vx_0, vy_0);
         fprintf(archivo, "%lf %lf %lf \n", b, phi, t); 
     }
     fclose(archivo); 
@@ -57,7 +58,7 @@ int main(int argc, char const *argv[]){
     return 0;
 }
 //==============================================================================
-void PathParticule(double t0, double x0, double y0, double vx_0, double vy_0, char *fileName){
+void path_particule(double t0, double x0, double y0, double vx_0, double vy_0, char *fileName){
     /* Esta funcion evoluciona el estado de la particula y escribe en el archivo
     "fileName" los datos correspondientes a la posicion en cada instante con su 
     respectiva velocidad*/
@@ -68,12 +69,12 @@ void PathParticule(double t0, double x0, double y0, double vx_0, double vy_0, ch
     fprintf(archivo, "%lf %lf %lf %lf %lf \n", t0, x0, y0, vx_0, vy_0);
 
     while(Distance(x0, y0) > R){
-        Solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, h);
+        solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, h);
         t0 += h;       
         fprintf(archivo, "%lf %lf %lf %lf% lf \n", t0, x0, y0, vx_0, vy_0);
     }
     while(Distance(x0, y0) <= R){
-            Solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, h);
+            solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, h);
             t0 += h;       
             fprintf(archivo, "%lf %lf %lf %lf% lf \n", t0, x0, y0, vx_0, vy_0);
     }        
@@ -81,15 +82,15 @@ void PathParticule(double t0, double x0, double y0, double vx_0, double vy_0, ch
     fclose(archivo);
 }
 //==============================================================================
-void ScatteringVariables(double t0, double x0, double y0, double vx_0, double vy_0){
+void scattering_variables(double t0, double x0, double y0, double vx_0, double vy_0){
     /* Esta funcion evoluciona el estado de un particula a partir de las 
-    ecuaciones diferencuales del sistema Dx, Dy, Dv_x, Dv_y, utilizando Solver
+    ecuaciones diferencuales del sistema Dx, Dy, Dv_x, Dv_y, utilizando solver
     para calcular las variables phi y t.*/
     
     while(Distance(x0, y0) > R){
         /* Mientras la particula este fuera del radio efectivo del potencial(R)
         simplemente se evoluciona el sistema. */
-        Solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, h);
+        solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, h);
         t0 += h;       
    }
 
@@ -97,7 +98,7 @@ void ScatteringVariables(double t0, double x0, double y0, double vx_0, double vy
         /* Mientras la particula este dentro del radio efectivo del potencial
         evoluciona el sistema y calcula el tiempo que le toma salir de esta
         region (t). */
-        Solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, h);
+        solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, h);
         t0 += h;
         t += h;      
    }
