@@ -16,24 +16,25 @@ double phi , t = 0; //phi:angulo de dispersion, t:tiempo dentro de la región R.
 //Prototipos
 void PathParticule(double t0, double x0, double y0, double vx_0, double vy_0,char *fileName);
 void ScatteringVariables(double t0, double x0, double y0, double vx_0, double vy_0);
-double Velx(double totalEnergy, double b , double *x0);
+double Velx(double totalEnergy, double b , double x0);
 double getXPosition(double totalEnergy, double b);
 //==============================================================================
 //Funcion principal
 int main(int argc, char const *argv[]){
     double t0 = 0, x0, vx_0, vy_0 = 0;  //condiciones iniciales
-    double totalEnergy = 0.1 * exp(-2);
+    double totalEnergy = 0.4 * exp(-2);
 
     //==========================================================================
     //Se calculan 4 trayectorias con parametros de impacto similares para ver el
     //caracter caotico del sistema.
     double b = -0.42;
-
+    
     for (int i = 0; i < 4; i++){
         char fileName[20];
 
         sprintf(fileName, "resultados/Trayectoria_%d.txt",i);
-        vx_0 = Velx(totalEnergy, b, &x0);
+        x0 = getXPosition(totalEnergy, b);
+        vx_0 = Velx(totalEnergy, b, x0);
         PathParticule(t0, x0, b, vx_0, vy_0, fileName);
         b += 1e-4;
     }
@@ -45,7 +46,8 @@ int main(int argc, char const *argv[]){
     for (b = -.6; b < -.1; b += 2e-4){
         //cada ciclo corresponde a un parametro de impacto(b) distinto.
         t = 0; 
-        vx_0 = Velx(totalEnergy, b, &x0);
+        x0 = getXPosition(totalEnergy, b);
+        vx_0 = Velx(totalEnergy, b, x0);
         ScatteringVariables(t0, x0, b, vx_0, vy_0);
         fprintf(archivo, "%lf %lf %lf \n", b, phi, t); 
     }
@@ -112,15 +114,12 @@ double getXPosition(double totalEnergy, double b){
     /*Esta funcion se utiliza para encontrar el x0 adecuado, tal que, no se tome
     un estado inicial con una energía mayor a totalEnergy, esto produciria 
     velocidades imaginarias.*/
-    srand(time(NULL));
-    return sqrt(totalEnergy) / (b * rand()) - 2;
+    return sqrt(totalEnergy) / b;
 }
 //==============================================================================
-double Velx(double totalEnergy, double b, double *x0){
+double Velx(double totalEnergy, double b, double x0){
     /*Esta funcion calcula la velocidad a patir de la ligadura del problema que 
     surge al imponer conservacion de la energia. A su vez, inicializa x0 con 
     getXPosition*/
-    *x0 = getXPosition(totalEnergy, b);
-    double v = 2 * (totalEnergy - V(*x0, b)) * 1/M;
-    return sqrt(v);
+    return sqrt( 2 * (totalEnergy - V(x0, b)) * 1/M);
 }
