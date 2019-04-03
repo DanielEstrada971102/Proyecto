@@ -10,18 +10,18 @@ void path_particule(double t0, double x0, double y0, double vx_0, double vy_0, c
     FILE *archivo;
     archivo = fopen(fileName, "w");
 
-    fprintf(archivo, "# t x y vx vy\n");
-    fprintf(archivo, "%lf %lf %lf %lf %lf \n", t0, x0, y0, vx_0, vy_0);
+    fprintf(archivo, "# t x y z vx vy\n");
+    fprintf(archivo, "%lf %lf %lf %lf %lf %lf \n", t0, x0, y0, 0.0, vx_0, vy_0);
 
     while(Distance(x0, y0) > R){
         solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, dt);
         t0 += dt;       
-        fprintf(archivo, "%lf %lf %lf %lf% lf \n", t0, x0, y0, vx_0, vy_0);
+        fprintf(archivo, "%lf %lf %lf %lf %lf %lf \n", t0, x0, y0, 0.0, vx_0, vy_0);
     }
     while(Distance(x0, y0) <= R){
             solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, dt);
             t0 += dt;       
-            fprintf(archivo, "%lf %lf %lf %lf% lf \n", t0, x0, y0, vx_0, vy_0);
+            fprintf(archivo, "%lf %lf %lf %lf %lf %lf \n", t0, x0, y0, 0.0, vx_0, vy_0);
     }        
 
     fclose(archivo);
