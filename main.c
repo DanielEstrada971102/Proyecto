@@ -10,9 +10,9 @@ int main(int argc, char const *argv[]){
     printf("- Press any other key for execute everything.\n");
     scanf("%d", &option);
 
-    double t0 = 0, x0, vx_0, vy_0 = 0;  //condiciones iniciales
+    double t0 = 0, x0 = -5 * R, vx_0, vy_0 = 0;  //condiciones iniciales
     double maxEnergy = exp(-2);
-    double totalEnergy = .26 * maxEnergy;
+    double totalEnergy = .16 * maxEnergy;
 
     //Se calculan 4 trayectorias con parametros de impacto similares para ver el
     //caracter caotico del sistema.
@@ -24,7 +24,7 @@ int main(int argc, char const *argv[]){
         char fileName[40];
 
         sprintf(fileName, "resultados/Trayectoria_%d.txt",i);
-        x0 = getXPosition(totalEnergy, b);
+        //x0 = getXPosition(totalEnergy, b);
         vx_0 = velx(totalEnergy, b, x0);
         path_particule(t0, x0, b, vx_0, vy_0, fileName);
         b += 1e-4;
@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]){
         FILE *archivo = fopen(fileName2, "w");
 
         fprintf(archivo, "# b phi t \n");
-        for (b = -.6; b < -.1; b += 2e-4){
+        for (b = -.28; b < -.27; b += 2e-7){
             //cada ciclo corresponde a un parametro de impacto(b) distinto.
             t = 0; 
             x0 = getXPosition(totalEnergy, b);
