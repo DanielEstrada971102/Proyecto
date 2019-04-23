@@ -1,8 +1,7 @@
-
-cc = gcc
+CC = gcc
 GFLAGS=-I. -Wall 
-LFLAGS= -lm
-OBJS= main.o initial_conditions.o solver.o system_evol.o
+LFLAGS= -lgsl -lgslcblas -lm
+OBJS= main.o initial_conditions.o solver.o system_evol.o Fractal_dimention.o
 EXE= chaoticScattering.out
 
 compiler: $(OBJS)

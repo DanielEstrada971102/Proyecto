@@ -38,7 +38,7 @@ void scattering_variables(double t0, double x0, double y0, double vx_0, double v
         solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, dt);
         t0 += dt;       
    }
-
+   //printf("Entro...\n");
     while(Distance(x0, y0) <= R){
         /* Mientras la particula este dentro del radio efectivo del potencial
         evoluciona el sistema y calcula el tiempo que le toma salir de esta
@@ -47,6 +47,7 @@ void scattering_variables(double t0, double x0, double y0, double vx_0, double v
         t0 += dt;
         t += dt;      
    }
+   //printf("Salio...\n");
    // Una vez que haya salido del radio efectivo del potencial se calcula phi
    phi = atan(y0/x0);
 }
