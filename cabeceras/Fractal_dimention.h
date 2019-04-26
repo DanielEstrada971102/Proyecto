@@ -1,1 +1,2 @@
-void dimention(double eps, int *N, int *Nc, double t0, double x0, double y0, double vx_0, double vy_0, double E);
+void fractal_dimention(double eps, int *N, int *Nc, double t0, double x0, double y0, double vx_0, double vy_0, double E);
+void liapunov_exponent(double t0, double x0, double y0, double vx_0, double vy_0, double E);

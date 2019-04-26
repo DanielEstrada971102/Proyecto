@@ -8,12 +8,13 @@ int main(int argc, char const *argv[]){
     printf("2. For calculate the scattering angle(phi) and the escape time(t) in function of the impact parameter (b).\n");
     printf("3. For calculate the scattering angle and the escape time in function of the impact parameter for several values of initial energy.\n");
     printf("4. For calculate the fractal dimention.\n");
-    printf("- Press any other key for execute everything.\n");
+    printf("5. For calculate de Liapunov exponet.\n");
+    printf("- Press any other key for not execute nothing.\n");
     scanf("%d", &option);
         
-    double t0 = 0, x0 = -5 * R, b = -0.42, vx_0, vy_0 = 0;  //condiciones iniciales
-    double maxEnergy = exp(-2);
-    double totalEnergy = 0.4 * maxEnergy;
+    double t0 = 0, x0 = -5 * R, b = -0.5, vx_0, vy_0 = 0;  //condiciones iniciales
+    double maxEnergy = M * exp(-2);
+    double totalEnergy = 0.26 * maxEnergy;
 
 
 
@@ -78,22 +79,33 @@ int main(int argc, char const *argv[]){
     if(option == 4){
         int k = 0;
         double c0, c1, cov00, cov01, cov11, sumq; //variables para gsl
-        double EPS[50];
-        double f[50];
+        double logEPS[50];
+        double logF[50];
         double D;
 
         for (double eps = 1e-5; eps < 1e-2; eps+= 2e-4){
             int N = 0, Nc = 0;
-            EPS[k] = log10(eps);
-            dimention(eps, &N, &Nc, t0, x0, b, vx_0, vy_0, totalEnergy);
-            f[k] = log10( (double) N / Nc);
+            logEPS[k] = log10(eps);
+            fractal_dimention(eps, &N, &Nc, t0, x0, b, vx_0, vy_0, totalEnergy);
+            logF[k] = log10( (double) N / Nc);
             k++ ;
         }
-        gsl_fit_linear(EPS, 1, f, 1, 50, &c0, &c1, &cov00, &cov01, &cov11, &sumq);
+        gsl_fit_linear(logEPS, 1, logF, 1, 50, &c0, &c1, &cov00, &cov01, &cov11, &sumq);
 
         D = 1 - c1;
-        printf("%lf \n", D);
+        printf("La dimensión fractal es %lf \n", D);
 
+    }
+
+    if (option == 5)
+    {   
+        for (double b = -.6; b < -.1; b += 2e-2)
+        {
+            printf("%lf\n", b);
+            vx_0 = velx(totalEnergy, b, x0);
+            liapunov_exponent(t0, x0, b, vx_0, vy_0, totalEnergy);
+        }
+        
     }
 
     return 0;
