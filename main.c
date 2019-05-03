@@ -3,78 +3,101 @@
 //Funcion principal
 int main(int argc, char const *argv[]){
     int option;
+    double b, bmin, bmax, db;
+    double Iconditions[6];
+    char comentario = '#';
+    char *nombreParametro[6];
+    double maxEnergy;              
+    double totalEnergy;    
+
+    nombreParametro[0] = "t0";
+    nombreParametro[1] = "x0";
+    nombreParametro[2] = "y0";
+    nombreParametro[3] = "vx0"; 
+    nombreParametro[4] = "vy0";
+    nombreParametro[5] = "E";
+    
+    // Se establecen las condiciones iniciales a partir dela archivo de parametros.
+    read_Iconditions(nombreParametro, "parametros.dat", comentario, Iconditions);
+                                    
+    maxEnergy = M * exp(-2);        
+    totalEnergy = Iconditions[En] * maxEnergy; 
+    
+    // Opciones que el usuario puede elegir====================================
     printf("Press:\n");
     printf("1. For calculate four trajectories with similars impact parameters.\n");
     printf("2. For calculate the scattering angle(phi) and the escape time(t) in function of the impact parameter (b).\n");
-    printf("3. For calculate the scattering angle and the escape time in function of the impact parameter for several values of initial energy.\n");
+    printf("3. For calculate the number of irregular points depending on the initial energy of the system.\n");
     printf("4. For calculate the fractal dimention.\n");
     printf("5. For calculate de Liapunov exponet.\n");
     printf("- Press any other key for not execute nothing.\n");
     scanf("%d", &option);
-        
-    double t0 = 0, x0 = -5 * R, b = -0.5, vx_0, vy_0 = 0;  //condiciones iniciales
-    double maxEnergy = M * exp(-2);
-    double totalEnergy = 0.26 * maxEnergy;
-
-
-
+    //=========================================================================
     //Se calculan 4 trayectorias con parametros de impacto similares para ver el
     //caracter caotico del sistema.
     if (option == 1){    
+        printf("Ingrese un parametro de impacto b: \n");
+        scanf("%lf", &b);    
         for (int i = 0; i < 4; i++){
             char fileName[40];
 
             sprintf(fileName, "resultados/Trayectoria_%d.txt",i);
-            //x0 = getXPosition(totalEnergy, b);
-            vx_0 = velx(totalEnergy, b, x0);
-            path_particule(t0, x0, b, vx_0, vy_0, fileName);
+        
+            Iconditions[Y] = b;
+            Iconditions[VX] = velx(totalEnergy, b, Iconditions[X]);
+            
+            path_particule(Iconditions, fileName);
             b += 1e-4;
         }
+        system("python trayectorias.py");
     }
     //==========================================================================
-    // se calcula phi y t para b en [-.6 : -.1]
+    // se calcula phi y t para b en [bmin : bmax] en pasos db
     if(option == 2){
+        printf("Ingrese bmin, bmax y db: \n");
+        scanf("%lf %lf %lf", &bmin, &bmax, &db);
+
         char fileName2[] = "resultados/S_variables.txt";
 
         FILE *archivo = fopen(fileName2, "w");
 
         fprintf(archivo, "# b phi t \n");
-        for (b = -.6; b < -.1; b += 2e-5){
+        for (b = bmin; b < bmax; b += db){
             //cada ciclo corresponde a un parametro de impacto(b) distinto.
             t = 0; 
-            //x0 = getXPosition(totalEnergy, b);
-            vx_0 = velx(totalEnergy, b, x0);
-            scattering_variables(t0, x0, b, vx_0, vy_0);
+            
+            Iconditions[Y] = b;
+            Iconditions[VX]= velx(totalEnergy, b, Iconditions[X]);
+            scattering_variables(Iconditions);
+
             fprintf(archivo, "%lf %lf %lf \n", b, phi, t); 
         }
 
         fclose(archivo);
+        system("python S_variables.py");
     }
     //==========================================================================
-    // se calcula phi y t para b en [-.6 : -.1] vaiando la energia del sistema
-    if (option == 3){
-        double E;
-        for (int i=1; i<=20 ; i+=2){
-            E = i* .1 * maxEnergy;
-            char fileName3[40];
+    // Se calcula el numero de puntos irregulares(caoticos) para energias del 
+    // sistema en en el intervalo [0, 2*E_maxima]
+    if(option == 3){
+        int nP_Irreg;
 
-            sprintf(fileName3, "resultados/S_variables_E=%.2lf.txt",E);
+        char fileName2[] = "resultados/nPuntos_energy.txt";
+        FILE *archivo = fopen(fileName2, "w");
 
-            FILE *archivo = fopen(fileName3, "w");
+        printf("Ingrese bmin, bmax y db: \n");
+        scanf("%lf %lf %lf", &bmin, &bmax, &db);
 
-            fprintf(archivo, "# b phi t \n");
-            for (b = -1; b < -.1; b += 2e-4){
-                //cada ciclo corresponde a un parametro de impacto(b) distinto.
-                t = 0; 
-                //x0 = getXPosition(E, b);
-                vx_0 = velx(E, b, x0);
-                scattering_variables(t0, x0, b, vx_0, vy_0);
-                fprintf(archivo, "%lf %lf %lf \n", b, phi, t); 
-            }
-
-            fclose(archivo); 
+        fprintf(archivo, "# E nPuntos_Irregulares \n");
+        
+        for (double E = 0; E < 2 * maxEnergy; E += .01 * maxEnergy){
+            nP_Irreg = nPuntos_Irregulares(Iconditions, E, bmin, bmax, db, .2);
+            fprintf(archivo, "%lf %d \n", E/maxEnergy, nP_Irreg);            
         }
+        
+        fclose(archivo);
     }
+    //==========================================================================
     // Se calcula la dimension fractal
     if(option == 4){
         int k = 0;
@@ -86,7 +109,7 @@ int main(int argc, char const *argv[]){
         for (double eps = 1e-5; eps < 1e-2; eps+= 2e-4){
             int N = 0, Nc = 0;
             logEPS[k] = log10(eps);
-            fractal_dimention(eps, &N, &Nc, t0, x0, b, vx_0, vy_0, totalEnergy);
+            fractal_dimention(eps, &N, &Nc, Iconditions, totalEnergy);
             logF[k] = log10( (double) N / Nc);
             k++ ;
         }
@@ -96,17 +119,27 @@ int main(int argc, char const *argv[]){
         printf("La dimensión fractal es %lf \n", D);
 
     }
+    //==========================================================================
+    // Se culcula el exponente de liapunov para diferentes valores de b.
+    if (option == 5){   
+        printf("Ingrese bmin, bmax y db: \n");
+        scanf("%lf %lf %lf", &bmin, &bmax, &db);
+        double lambda;
+        int n = nPuntos_Irregulares(Iconditions, totalEnergy, bmin, bmax, db, .2);
+        double b[n];
 
-    if (option == 5)
-    {   
-        for (double b = -.6; b < -.1; b += 2e-2)
-        {
-            printf("%lf\n", b);
-            vx_0 = velx(totalEnergy, b, x0);
-            liapunov_exponent(t0, x0, b, vx_0, vy_0, totalEnergy);
-        }
+        get_puntos_Irregulares(Iconditions, totalEnergy, bmin, bmax, db, .2, b);
         
+        for (int i = 0; i < n; i++){
+            Iconditions[Y] = b[i];
+            Iconditions[VX] = velx(totalEnergy, b[i], Iconditions[X]);
+            lambda = lyapunov_exponent(Iconditions, totalEnergy, 2e-2, 1000);
+            printf("b = %lf, Lambda = %lf\n", b[i], lambda);
+        }   
     }
+
 
     return 0;
 }
+
+

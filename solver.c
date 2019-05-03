@@ -33,6 +33,7 @@ void solver(double (*f1)(double, double, double, double, double),
             double *t, double *p1, double *p2, double *p3, double *p4, double h)
 {
     double k11, k12, k13, k14, k21, k22, k23, k24, k31, k32, k33, k34, k41, k42, k43, k44;
+    
 
     k11 = h * (*f1)(*t, *p1, *p2, *p3, *p4);
     k12 = h * (*f2)(*t, *p1, *p2, *p3, *p4);

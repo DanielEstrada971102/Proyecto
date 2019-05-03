@@ -1,0 +1,8 @@
+# Archivo de condiciones iniciales 
+
+t0        0       #tiempo_inicial 
+x0        -15      #posicion_inicial_en_x
+y0        0.28    #posicion_inicial_en_y
+vx0       1       #velocidad_inicial_en_x
+vy0       0       #velocidad_inicial_en_y
+E         0.26    #Energía_inicial_de_la_particula
