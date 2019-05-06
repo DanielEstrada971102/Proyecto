@@ -13,23 +13,26 @@ void path_particule(double Iconditions[], char *fileName){
     double y0 = Iconditions[Y];     //--> Condiciones iniciales
     double vx_0 = Iconditions[VX];  //
     double vy_0 = Iconditions[VY];  //
-    double E = Iconditions[En];
+    double E0 = Iconditions[En] * exp(-2);
+    double E = E0;
 
     FILE *archivo; 
     archivo = fopen(fileName, "w");
 
     fprintf(archivo, "# t x y z vx vy E\n");
-    fprintf(archivo, "%lf %lf %lf %lf %lf %lf \n", t0, x0, y0, vx_0, vy_0, E);
+    fprintf(archivo, "%lf %lf %lf %lf %lf %.2e \n", t0, x0, y0, vx_0, vy_0, E -E0);
 
     while(Distance(x0, y0) > R){
         solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, dt);
-        t0 += dt;       
-        fprintf(archivo, "%lf %lf %lf %lf %lf %lf \n", t0, x0, y0, vx_0, vy_0, E);
+        t0 += dt;
+        E = getEnergy(x0, y0, vx_0, vy_0);       
+        fprintf(archivo, "%lf %lf %lf %lf %lf %.2e \n", t0, x0, y0, vx_0, vy_0, E - E0);
     }
     while(Distance(x0, y0) <= R){
         solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, dt);
-        t0 += dt;       
-        fprintf(archivo, "%lf %lf %lf %lf %lf %lf \n", t0, x0, y0, vx_0, vy_0, E);
+        t0 += dt;
+        E = getEnergy(x0, y0, vx_0, vy_0);       
+        fprintf(archivo, "%lf %lf %lf %lf %lf %.2e\n", t0, x0, y0, vx_0, vy_0, E - E0);
     }        
 
     fclose(archivo);

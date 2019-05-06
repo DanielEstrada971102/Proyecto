@@ -6,7 +6,7 @@ int main(int argc, char const *argv[]){
     double b, bmin, bmax, db;
     double Iconditions[6];
     char comentario = '#';
-    char *nombreParametro[6];
+    char *nombreParametro[6], sys[30];
     double maxEnergy;              
     double totalEnergy;    
 
@@ -28,8 +28,8 @@ int main(int argc, char const *argv[]){
     printf("1. For calculate four trajectories with similars impact parameters.\n");
     printf("2. For calculate the scattering angle(phi) and the escape time(t) in function of the impact parameter (b).\n");
     printf("3. For calculate the number of irregular points depending on the initial energy of the system.\n");
-    printf("4. For calculate the fractal dimention.\n");
-    printf("5. For calculate de Liapunov exponet.\n");
+    //printf("4. For calculate the fractal dimention.\n");
+    printf("4. For calculate de Liapunov exponet.\n");
     printf("- Press any other key for not execute nothing.\n");
     scanf("%d", &option);
     //=========================================================================
@@ -37,7 +37,8 @@ int main(int argc, char const *argv[]){
     //caracter caotico del sistema.
     if (option == 1){    
         printf("Ingrese un parametro de impacto b: \n");
-        scanf("%lf", &b);    
+        scanf("%lf", &b); 
+
         for (int i = 0; i < 4; i++){
             char fileName[40];
 
@@ -49,7 +50,9 @@ int main(int argc, char const *argv[]){
             path_particule(Iconditions, fileName);
             b += 1e-4;
         }
-        system("python trayectorias.py");
+        sprintf(sys, "python trayectorias.py %.4lf %.4lf %.4lf %.4lf %.2lf", b, b + 1e-4, 
+                                                      b + 2e-4, b + 3e-4, Iconditions[En]);
+        system(sys);
     }
     //==========================================================================
     // se calcula phi y t para b en [bmin : bmax] en pasos db
@@ -74,7 +77,8 @@ int main(int argc, char const *argv[]){
         }
 
         fclose(archivo);
-        system("python S_variables.py");
+        sprintf(sys, "python S_variables.py %.2lf", Iconditions[En]);
+        system(sys);
     }
     //==========================================================================
     // Se calcula el numero de puntos irregulares(caoticos) para energias del 
@@ -96,10 +100,17 @@ int main(int argc, char const *argv[]){
         }
         
         fclose(archivo);
+        sprintf(sys, "python Energy.py %.2lf", 1.0);
+        system(sys);
     }
-    //==========================================================================
-    // Se calcula la dimension fractal
-    if(option == 4){
+    //==========================================================================        
+    // Se calcula la dimension fractal_dimention
+
+    // Este metodo fue conjeturado en un articulo por lo tanto no se presenta en 
+    // los resultados finales del proyecto, sin embargo, no se elimina del codigo
+    // para una posible corroboracion futura.
+
+    if(option == 5){
         int k = 0;
         double c0, c1, cov00, cov01, cov11, sumq; //variables para gsl
         double logEPS[50];
@@ -121,7 +132,13 @@ int main(int argc, char const *argv[]){
     }
     //==========================================================================
     // Se culcula el exponente de liapunov para diferentes valores de b.
-    if (option == 5){   
+
+    // Este metodo si esta verificado y esta basado en libros de texto, sin embargo,
+    // para el sistema que se esta trabjando presenta fallas por no tener atractores.
+    // como en el caso anterior no se elimina del codigo pues el algoritmo esta 
+    // bien programado.
+
+    if (option == 6){   
         printf("Ingrese bmin, bmax y db: \n");
         scanf("%lf %lf %lf", &bmin, &bmax, &db);
         double lambda;
@@ -136,6 +153,28 @@ int main(int argc, char const *argv[]){
             lambda = lyapunov_exponent(Iconditions, totalEnergy, 2e-2, 1000);
             printf("b = %lf, Lambda = %lf\n", b[i], lambda);
         }   
+    }
+    //==========================================================================
+    // Se culcula el exponente de liapunov para diferentes valores de b con el segundo metodo.
+    //Este es el metodo utilizado para presentar en el resultado final del proyecto.
+    if (option == 4){   
+        printf("Ingrese bmin, bmax y db: \n");
+        scanf("%lf %lf %lf", &bmin, &bmax, &db);
+        double th, a = 1e-3, d0 = 2e-6;
+        int n = nPuntos_Irregulares(Iconditions, totalEnergy, bmin, bmax, db, .2);
+        double b[n];
+        double lambda = 0;    
+
+        get_puntos_Irregulares(Iconditions, totalEnergy, bmin, bmax, db, .2, b);
+        
+        for (int i = 0; i < n; i++){
+            Iconditions[Y] = b[i];
+            Iconditions[VX] = velx(totalEnergy, b[i], Iconditions[X]);
+            th = lyapunov_exponent2(Iconditions, totalEnergy, d0, a);
+            lambda += 1/th * log(a / d0);
+        }
+
+        printf("Exponente de lyapunov = %.3lf\n", lambda / n);
     }
 
 

@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sys import argv
 
 
 def V(x, y):
@@ -19,17 +20,24 @@ def main():
     Z = V(X, Y)
 
     plt.contour(X, Y, Z, colors='k')
-    plt.plot(x0, y0, color='blue', label='b = -0.2800')
-    plt.plot(x1, y1, color='green', label='b = -0.2801')
-    plt.plot(x2, y2, color='tomato', label='b = -0.2802')
-    plt.plot(x3, y3, color='darkmagenta', label='b = -0.2803')
+    plt.plot(x0, y0, color='blue', label='b =' + argv[1])
+    plt.plot(x1, y1, color='green', label='b =' + argv[2])
+    plt.plot(x2, y2, color='tomato', label='b =' + argv[3])
+    plt.plot(x3, y3, color='darkmagenta', label='b =' + argv[4])
     plt.xlabel(r'$x$', fontsize=16)
     plt.ylabel(r'$y$', fontsize=16)
     plt.xlim(-3, 3)
     plt.ylim(-3, 3)
     plt.legend(fontsize=14)
     plt.grid()
-    plt.title(r"Trayecotorias con $\frac{E}{E_m} = 1.2$", fontsize=18)
+    plt.title(r"Trayecotorias con $\frac{E}{E_m} = $" + argv[5], fontsize=18)
+    plt.show()
+
+    plt.plot(t0, E, 'k')
+    plt.title(u"Gráfico de conservación de la energía", fontsize=18)
+    plt.xlabel("t", fontsize=16)
+    plt.ylabel(r"$E - E_0$", fontsize=16)
+    plt.grid(True)
     plt.show()
 
 

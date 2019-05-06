@@ -137,3 +137,47 @@ int get_puntos_Irregulares(double Iconditions[], double E, double bmin, double b
     }
     return 0; 
 }
+
+double lyapunov_exponent2(double Iconditions[],double E, double d_0, double a){
+    double t0 = Iconditions[T];     //
+    double x0 = Iconditions[X];     //
+    double y0 = Iconditions[Y];     //--> Condiciones iniciales
+    double vx_0 = Iconditions[VX];  //
+    double vy_0 = Iconditions[VY];  //
+
+    // variables para el calculo.
+    double dx, dy, dr, lambda;//dr0 = d_0
+    double x1, y1, vx1_0, vy1_0;
+    int i = 0, n = 1000;
+    t = 0;
+
+    // Se evoluciona el sistema hasta que este en la region del potencial
+    while(Distance(x0, y0) > (R-0.2)){
+
+        solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, dt);
+        t0 += dt;       
+    }
+
+    // se establecen las condiciones iniciales de la segunda trayectoria separa d0
+    x1 = x0;
+    y1 = y0 + d_0;
+    vy1_0 = vy_0; 
+    vx1_0 = velx(E, y1, x1);
+
+    while(1 && i != n){
+        solver(Dx, Dy, Dv_x, Dv_y, &t0, &x0, &y0, &vx_0, &vy_0, dt);
+        solver(Dx, Dy, Dv_x, Dv_y, &t0, &x1, &y1, &vx1_0, &vy1_0, dt);
+        t = t0;
+        dx = x1 - x0;
+        dy = y1 - y0;
+        dr = sqrt(dx * dx + dy * dy);
+
+        if (dr > a){
+            return t;
+        }
+        
+        t0 += dt;
+    }
+
+    return 0;   
+} 
