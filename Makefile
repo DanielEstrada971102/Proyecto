@@ -8,4 +8,4 @@ compiler: $(OBJS)
 	$(CC) $(GFLAGS) $(OBJS) $(LFLAGS) -o $(EXE)
 	rm $(OBJS)
 clean:
-	rm *.out resultados/*.txt
+	rm *.out results/*.txt

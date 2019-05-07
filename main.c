@@ -1,4 +1,4 @@
-#include "cabeceras/allvars.h"
+#include "headers/allvars.h"
 
 //Funcion principal
 int main(int argc, char const *argv[]){
@@ -25,42 +25,41 @@ int main(int argc, char const *argv[]){
     
     // Opciones que el usuario puede elegir====================================
     printf("Press:\n");
-    printf("1. For calculate four trajectories with similars impact parameters.\n");
-    printf("2. For calculate the scattering angle(phi) and the escape time(t) in function of the impact parameter (b).\n");
-    printf("3. For calculate the number of irregular points depending on the initial energy of the system.\n");
-    //printf("4. For calculate the fractal dimention.\n");
-    printf("4. For calculate de Liapunov exponet.\n");
+    printf("1. For calculating four trajectories with similars impact parameters.\n");
+    printf("2. For calculating the scattering angle(phi) and the escape time(t) as function of the impact parameter (b).\n");
+    printf("3. For calculating the number of irregular points depending on the initial energy of the system.\n");
+    //printf("4. For calculating the fractal dimention.\n");
+    printf("4. For calculating de Liapunov exponet.\n");
     printf("- Press any other key for not execute nothing.\n");
     scanf("%d", &option);
     //=========================================================================
     //Se calculan 4 trayectorias con parametros de impacto similares para ver el
     //caracter caotico del sistema.
     if (option == 1){    
-        printf("Ingrese un parametro de impacto b: \n");
+        printf("Enter an impact parameter (b): \n");
         scanf("%lf", &b); 
 
         for (int i = 0; i < 4; i++){
             char fileName[40];
 
-            sprintf(fileName, "resultados/Trayectoria_%d.txt",i);
+            sprintf(fileName, "results/Trayectoria_%d.txt",i);
         
             Iconditions[Y] = b;
             Iconditions[VX] = velx(totalEnergy, b, Iconditions[X]);
             
-            path_particule(Iconditions, fileName);
+            path_particle(Iconditions, fileName);
             b += 1e-4;
         }
-        sprintf(sys, "python trayectorias.py %.4lf %.4lf %.4lf %.4lf %.2lf", b, b + 1e-4, 
-                                                      b + 2e-4, b + 3e-4, Iconditions[En]);
+        sprintf(sys, "python graphics.py %d %.4lf %.4lf %.4lf %.4lf %.2lf", option, b, b + 1e-4, b + 2e-4, b + 3e-4, Iconditions[En]);
         system(sys);
     }
     //==========================================================================
     // se calcula phi y t para b en [bmin : bmax] en pasos db
     if(option == 2){
-        printf("Ingrese bmin, bmax y db: \n");
+        printf("Enter bmin, bmax and db: \n");
         scanf("%lf %lf %lf", &bmin, &bmax, &db);
 
-        char fileName2[] = "resultados/S_variables.txt";
+        char fileName2[] = "results/S_variables.txt";
 
         FILE *archivo = fopen(fileName2, "w");
 
@@ -77,7 +76,7 @@ int main(int argc, char const *argv[]){
         }
 
         fclose(archivo);
-        sprintf(sys, "python S_variables.py %.2lf", Iconditions[En]);
+        sprintf(sys, "python graphics.py %d %.2lf", option, Iconditions[En]);
         system(sys);
     }
     //==========================================================================
@@ -86,28 +85,28 @@ int main(int argc, char const *argv[]){
     if(option == 3){
         int nP_Irreg;
 
-        char fileName2[] = "resultados/nPuntos_energy.txt";
+        char fileName2[] = "results/nPuntos_energy.txt";
         FILE *archivo = fopen(fileName2, "w");
 
-        printf("Ingrese bmin, bmax y db: \n");
+        printf("Enter bmin, bmax and db: \n");
         scanf("%lf %lf %lf", &bmin, &bmax, &db);
 
-        fprintf(archivo, "# E nPuntos_Irregulares \n");
+        fprintf(archivo, "# E nIrregular_Points \n");
         
         for (double E = 0; E < 2 * maxEnergy; E += .01 * maxEnergy){
-            nP_Irreg = nPuntos_Irregulares(Iconditions, E, bmin, bmax, db, .2);
+            nP_Irreg = nIrregular_Points(Iconditions, E, bmin, bmax, db, .2);
             fprintf(archivo, "%lf %d \n", E/maxEnergy, nP_Irreg);            
         }
         
         fclose(archivo);
-        sprintf(sys, "python Energy.py %.2lf", 1.0);
+        sprintf(sys, "python graphics.py %d", option);
         system(sys);
     }
     //==========================================================================        
     // Se calcula la dimension fractal_dimention
 
     // Este metodo fue conjeturado en un articulo por lo tanto no se presenta en 
-    // los resultados finales del proyecto, sin embargo, no se elimina del codigo
+    // los results finales del proyecto, sin embargo, no se elimina del codigo
     // para una posible corroboracion futura.
 
     if(option == 5){
@@ -139,13 +138,13 @@ int main(int argc, char const *argv[]){
     // bien programado.
 
     if (option == 6){   
-        printf("Ingrese bmin, bmax y db: \n");
+        printf("Enter bmin, bmax and db: \n");
         scanf("%lf %lf %lf", &bmin, &bmax, &db);
         double lambda;
-        int n = nPuntos_Irregulares(Iconditions, totalEnergy, bmin, bmax, db, .2);
+        int n = nIrregular_Points(Iconditions, totalEnergy, bmin, bmax, db, .2);
         double b[n];
 
-        get_puntos_Irregulares(Iconditions, totalEnergy, bmin, bmax, db, .2, b);
+        get_irregulars_points(Iconditions, totalEnergy, bmin, bmax, db, .2, b);
         
         for (int i = 0; i < n; i++){
             Iconditions[Y] = b[i];
@@ -158,14 +157,14 @@ int main(int argc, char const *argv[]){
     // Se culcula el exponente de liapunov para diferentes valores de b con el segundo metodo.
     //Este es el metodo utilizado para presentar en el resultado final del proyecto.
     if (option == 4){   
-        printf("Ingrese bmin, bmax y db: \n");
+        printf("Enter bmin, bmax y db: \n");
         scanf("%lf %lf %lf", &bmin, &bmax, &db);
         double th, a = 1e-3, d0 = 2e-6;
-        int n = nPuntos_Irregulares(Iconditions, totalEnergy, bmin, bmax, db, .2);
+        int n = nIrregular_Points(Iconditions, totalEnergy, bmin, bmax, db, .2);
         double b[n];
         double lambda = 0;    
 
-        get_puntos_Irregulares(Iconditions, totalEnergy, bmin, bmax, db, .2, b);
+        get_irregulars_points(Iconditions, totalEnergy, bmin, bmax, db, .2, b);
         
         for (int i = 0; i < n; i++){
             Iconditions[Y] = b[i];

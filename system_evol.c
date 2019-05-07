@@ -1,9 +1,9 @@
-#include "cabeceras/allvars.h"
+#include "headers/allvars.h"
 
 double dt = 1e-2;
 double phi, t; //phi:angulo de dispersion, t:tiempo dentro de la región R.
 
-void path_particule(double Iconditions[], char *fileName){
+void path_particle(double Iconditions[], char *fileName){
     /* Esta funcion evoluciona el estado de la particula y escribe en el archivo
     "fileName" los datos correspondientes a la posicion en cada instante con su 
     respectiva velocidad*/

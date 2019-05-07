@@ -1,4 +1,4 @@
-#include "cabeceras/allvars.h"
+#include "headers/allvars.h"
 
 void fractal_dimention(double eps, int *N, int *Nc, double Iconditions[], double E){
 
@@ -77,7 +77,7 @@ double lyapunov_exponent(double Iconditions[],double E, double d_0, int n){
     return lambda;   
 }
 //==============================================================================
-int nPuntos_Irregulares(double Iconditions[], double E, double bmin, double bmax, double db, double dphi){
+int nIrregular_Points(double Iconditions[], double E, double bmin, double bmax, double db, double dphi){
     /*Esta funcion calcula cuantos de los parametros de impactos en el intevalo
     [bmin, bmax] son irregulares(caoticos), los b se estudian en intervalos de db
     y la condicion para que sea o no caotico un punto es que los angulos de dispersion
@@ -108,7 +108,7 @@ int nPuntos_Irregulares(double Iconditions[], double E, double bmin, double bmax
     return nP_Irreg; 
 }
 //==============================================================================
-int get_puntos_Irregulares(double Iconditions[], double E, double bmin, double bmax, double db, double dphi, double p[]){
+int get_irregulars_points(double Iconditions[], double E, double bmin, double bmax, double db, double dphi, double p[]){
     /*Esta funcion barre el intervalo de paramatros de impacto [bmin, bmax] y 
     almacena en el arreglo "p" los que sean caoticos.*/
     double phi1, phi2;

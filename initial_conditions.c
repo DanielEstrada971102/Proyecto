@@ -1,4 +1,4 @@
-#include "cabeceras/allvars.h"
+#include "headers/allvars.h"
 
 //==============================================================================
 double velx(double totalEnergy, double b, double x0){

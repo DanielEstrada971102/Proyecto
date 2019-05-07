@@ -22,7 +22,7 @@
     
     donde V = x²y²exp(-x²-y²). 
 */
-#include "cabeceras/allvars.h"
+#include "headers/allvars.h"
 
 //==============================================================================
 //RK4
